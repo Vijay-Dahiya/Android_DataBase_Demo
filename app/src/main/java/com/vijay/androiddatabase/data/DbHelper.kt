@@ -27,6 +27,49 @@ class DbHelper(context: Context?) : SQLiteOpenHelper(context,DB_NAME,null,versio
         onCreate(db)
     }
 
+    fun checkIfExist(email: String) : Boolean {
+        // this will check if email exist in our db or not
+        val database = this.readableDatabase
+        var isExisting = false
+        val cursor = database.rawQuery("SELECT * FROM register WHERE key_email = '$email'", null)
+        if (cursor.moveToFirst()) {
+            isExisting = true
+        }
+        cursor.close()
+        return isExisting
+    }
+
+    fun deleteProfile(email: String) : Boolean {
+        //this will delete the data where it will find the provided email
+        val database = this.writableDatabase
+        val code = database.delete(
+            "register",
+            "key_email=?",
+            arrayOf(email)
+        )
+        return code > 0
+    }
+
+    fun updateProfile(
+        name : String,
+        email: String,
+        pass: String
+    ) : Boolean {
+        // this will change the the name and pass , where it will find the email as provide
+        val database = this.writableDatabase
+        val contentValues= ContentValues()
+        contentValues.put("key_name",name)
+        contentValues.put("key_pass",pass)
+
+        val code = database.update(
+            "register",
+            contentValues,
+            "key_email=?",
+            arrayOf(email)
+        )
+        return code > 0
+    }
+
     fun getAllUsersHelper() : List<UserData?> {
         val database = this.readableDatabase
         val userList = mutableListOf<UserData>()
